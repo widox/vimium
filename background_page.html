@@ -80,7 +80,9 @@
     copyToClipboard: copyToClipboard,
     copyLinkUrl: copyLinkUrl,
     isEnabledForUrl: isEnabledForUrl,
-    saveHelpDialogSettings: saveHelpDialogSettings
+    saveHelpDialogSettings: saveHelpDialogSettings,
+    saveLastFindTerm: saveLastFindTerm,
+    getLastFindTerm: getLastFindTerm
   };
 
   // Event handlers
@@ -154,6 +156,14 @@
 
   function saveHelpDialogSettings(request) {
     localStorage["helpDialog_showAdvancedCommands"] = request.showAdvancedCommands;
+  }
+
+  function saveLastFindTerm(request) {
+    localStorage["lastFindTerm"] = request.lastFindTerm;
+  }
+
+  function getLastFindTerm(request) {
+    return { lastFindTerm: localStorage['lastFindTerm'] || '' };
   }
 
   function showHelp(callback, frameId) {

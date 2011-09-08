@@ -9,7 +9,7 @@ var getCurrentUrlHandlers = []; // function(url)
 
 var insertModeLock = null;
 var findMode = false;
-var findModeQuery = "";
+var findModeQuery;
 var findModeQueryHasResults = false;
 var isShowingHelpDialog = false;
 var handlerStack = [];
@@ -32,6 +32,8 @@ var textInputTypes = ["text", "search", "email", "url", "number"];
 var textInputXPath = '//input[' +
                      textInputTypes.map(function (type) { return '@type="' + type + '"'; }).join(" or ") +
                      ' or not(@type)]';
+  chrome.extension.sendRequest({ handler: "saveLastFindTerm",
+                               lastFindTerm: ' ' });
 
 var settings = {
   values: {},
@@ -75,6 +77,13 @@ var googleRegex = /:\/\/[^/]*google[^/]+/;
  */
 function initializePreDomReady() {
   settings.load();
+
+  chrome.extension.sendRequest({handler: "getLastFindTerm"}, function (response) {
+    findModeQuery = response.lastFindTerm;
+    console.log(response.lastFindTerm);
+    console.log(findModeQuery);
+  });
+    console.log("saved query: '" + findModeQuery + "'");
 
   checkIfEnabledForUrl();
 
@@ -533,6 +542,8 @@ function isInsertMode() { return insertModeLock !== null; }
 function handleKeyCharForFindMode(keyChar) {
   findModeQuery = findModeQuery + keyChar;
   performFindInPlace();
+  chrome.extension.sendRequest({ handler: "saveLastFindTerm",
+                               lastFindTerm: findModeQuery });
   showFindModeHUDForQuery();
 }
 
@@ -544,6 +555,8 @@ function handleDeleteForFindMode() {
   else {
     findModeQuery = findModeQuery.substring(0, findModeQuery.length - 1);
     performFindInPlace();
+    chrome.extension.sendRequest({ handler: "saveLastFindTerm",
+                                 lastFindTerm: findModeQuery });
     showFindModeHUDForQuery();
   }
 }
@@ -662,9 +675,9 @@ function insertSpaces(query) {
 }
 
 function enterFindMode() {
-  findModeQuery = "";
+  //findModeQuery = "";
   findMode = true;
-  HUD.show("/");
+  HUD.show("/" + findModeQuery);
 }
 
 function exitFindMode() {
